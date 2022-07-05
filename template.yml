@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: sportcenter-booking lambdas
+Globals:
+  Function: 
+    Timeout: 5
+Resources:
+  ReserveRegistry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./reservationRegistry
+      Handler: reservation-registry
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: '/api/registry'
+            Method: post
