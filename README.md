@@ -27,11 +27,12 @@ curl -X POST localhost:3000/api/registry -d '
 ```
 
 ### Environment file
-Environment json file format
+Environment json file format for local testing
 ```json
 {
     "ReserveRegistry": {
-        "S3Bucket": "s3-bucket-name"
+        "S3Bucket": "s3-bucket-name",
+        "secretKey": "s3 byte hex value"
     }
 }
 ```

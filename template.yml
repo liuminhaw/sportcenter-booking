@@ -17,6 +17,7 @@ Resources:
       Environment:
         Variables:
           S3Bucket: default-bucket
+          secretKey: 32byte-hex
       Events:
         Api:
           Type: Api
