@@ -13,8 +13,10 @@ sam local start-api
 
 # start local api service with custom environment variables and aws credential profile name
 sam local start-api -n environments-dev.json --profile role-profile-name
+```
 
-# curl and sent data
+### Reserve Registry Request
+```
 curl -X POST localhost:3000/api/registry -d '
     {
         "username": "redone", 
@@ -26,13 +28,22 @@ curl -X POST localhost:3000/api/registry -d '
 '
 ```
 
+### Fetch Registry Request
+```
+curl -X GET localhost:3000/api/registry?id=xxxxxxx
+```
+
 ### Environment file
 Environment json file format for local testing
 ```json
 {
     "ReserveRegistry": {
         "S3Bucket": "s3-bucket-name",
-        "secretKey": "s3 byte hex value"
+        "secretKey": "s3 byte hex value (32byte hex)"
+    },
+    "FetchRegistry": {
+        "S3Bucket": "s3-bucket-name",
+        "secretKey": "s3 byte hex value (32byte hex)"
     }
 }
 ```
