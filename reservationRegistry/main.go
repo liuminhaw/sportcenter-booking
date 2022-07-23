@@ -18,7 +18,6 @@ import (
 )
 
 const respBodyContent = `Username: %s
-Password: %s
 Reserve date: %v
 Reserve court: %s
 Reserve time: %s
@@ -93,7 +92,7 @@ func reservationRegistry(event events.APIGatewayProxyRequest) (events.APIGateway
 	}
 
 	respBody := fmt.Sprintf(respBodyContent,
-		data.Username, data.Password, data.ReserveDate, data.ReserveCourt, data.ReserveTime)
+		data.Username, data.ReserveDate, data.ReserveCourt, data.ReserveTime)
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
