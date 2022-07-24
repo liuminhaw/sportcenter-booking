@@ -66,7 +66,7 @@ func fetchRegistry(event events.APIGatewayProxyRequest) (events.APIGatewayProxyR
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       fmt.Sprintf("Content: %s\n", string(s3Registry.Content)),
+		Body:       string(s3Registry.Content),
 	}, nil
 }
 
