@@ -3,6 +3,7 @@ package registry
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"golang.org/x/crypto/nacl/secretbox"
 )
@@ -31,7 +33,7 @@ type Registry struct {
 
 // CreateRegistryFile create temporary file in /tmp directory
 // with content of Registry.Content
-func (r Registry) CreateRegistryFile(key string) {
+func (r *Registry) CreateRegistryFile(key string) {
 	f, err := os.Create(fmt.Sprintf("/tmp/%s", r.Filename))
 	if err != nil {
 		panic(err)
@@ -44,7 +46,7 @@ func (r Registry) CreateRegistryFile(key string) {
 
 // UploadRegistryFile upload the file (created by CreateRegistryFile method)
 // to S3 at path s3://Bucket/Dirname/Filename
-func (r Registry) UploadRegistryFile(sess *session.Session) {
+func (r *Registry) UploadRegistryFile(sess *session.Session) {
 	f, err := os.Open(fmt.Sprintf("/tmp/%s", r.Filename))
 	if err != nil {
 		panic(err)
@@ -65,9 +67,29 @@ func (r Registry) UploadRegistryFile(sess *session.Session) {
 	fmt.Printf("Successfully uploaded %v to %q\n", f, r.Bucket)
 }
 
+// FetchRegistryFile read content from s3 file and store content into Registry r
+func (r *Registry) FetchRegistryFile(sess *session.Session, key string) error {
+	buf := aws.NewWriteAtBuffer([]byte{})
+
+	downloader := s3manager.NewDownloader(sess)
+	filepath := fmt.Sprintf("%s/%s", r.Dirname, r.Filename)
+	_, err := downloader.Download(buf, &s3.GetObjectInput{
+		Bucket: aws.String(r.Bucket),
+		Key:    aws.String(filepath),
+	})
+	if err != nil {
+		fmt.Printf("Unable to fetch file %s from bucket %s\n", filepath, r.Bucket)
+		return errors.New("s3 fetch file error")
+	}
+	fmt.Printf("Successfully fetch file %s from bucket %s\n", filepath, r.Bucket)
+
+	r.openFile(buf.Bytes(), key)
+	return nil
+}
+
 // sealFile encrypt Registry.Content with provided 32 bytes hexKey
 // and return the encrypted result
-func (r Registry) sealFile(hexKey string) []byte {
+func (r *Registry) sealFile(hexKey string) []byte {
 	secretKeyBytes, err := hex.DecodeString(hexKey)
 	if err != nil {
 		panic(err)
@@ -86,7 +108,7 @@ func (r Registry) sealFile(hexKey string) []byte {
 
 // openFile decrypt given encrypted input with 32 byte hexKey and assigned decrypted
 // value to Registry.Content
-func (r Registry) openFile(encrypted []byte, hexKey string) {
+func (r *Registry) openFile(encrypted []byte, hexKey string) {
 	secretKeyBytes, err := hex.DecodeString(hexKey)
 	if err != nil {
 		panic(err)

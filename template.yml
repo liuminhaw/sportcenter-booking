@@ -6,6 +6,10 @@ Globals:
   Function: 
     Timeout: 5
 Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Develop
   ReserveRegistry:
     Type: AWS::Serverless::Function
     Properties:
@@ -24,3 +28,23 @@ Resources:
           Properties:
             Path: '/api/registry'
             Method: post
+            RestApiId: ApiGatewayApi
+  FetchRegistry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./fetchRegistry
+      Handler: fetch-registry
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          S3Bucket: default-bucket
+          secretKey: 32byte-hex
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: '/api/registry'
+            Method: get
+            RestApiId: ApiGatewayApi
