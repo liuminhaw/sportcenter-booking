@@ -9,4 +9,6 @@ RUN apt update \
     && apt autoclean -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY loginCookie /usr/local/bin/
+COPY loginCookie.out /usr/local/bin/
+
+ENTRYPOINT ["/usr/local/bin/loginCookie.out"]

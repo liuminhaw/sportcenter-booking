@@ -6,7 +6,7 @@ Building application
 ```
 sam build
 ``` 
-Local testing API
+### Local testing API
 ```bash
 # start local api service
 sam local start-api
@@ -46,4 +46,34 @@ Environment json file format for local testing
         "secretKey": "s3 byte hex value (32byte hex)"
     }
 }
+```
+
+## AWS ECS
+
+### Login Cookie Feature
+Create `.env` file to store required variables 
+- _AWS_REGION
+- _ENDPOINT_AWS_PROFILE
+- _APP_AWS_ROLE
+- _S3_BUCKET
+- _DAAN_LOGIN
+
+#### Testing with container and role
+Execute docker compose for local testing
+```bash
+docker compose up -d
+```
+View outputs
+```bash
+docker compose logs [SERVICE]
+```
+
+#### Testing program execution
+Build
+```bash
+go build -o loginCookie.out
+```
+Test
+```bash
+env $(cat .env | xargs) ./loginCookie.out -profile="aws profile name"
 ```

@@ -16,4 +16,8 @@
 
 # aws sam files
 .aws-sam
+
+# Environment files
 environments-dev.json
+.env
+
