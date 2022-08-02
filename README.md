@@ -55,6 +55,7 @@ Create `.env` file to store required variables
 - _AWS_REGION
 - _ENDPOINT_AWS_PROFILE
 - _APP_AWS_ROLE
+- _ENC_KEY
 - _S3_BUCKET
 - _DAAN_LOGIN
 

@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -14,6 +17,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+	"github.com/liuminhaw/sportcenter-booking/registry"
+	"github.com/liuminhaw/sportcenter-booking/secrets"
 )
 
 // create chrome instance in windowed mode, run, and close after 5 seconds
@@ -39,8 +44,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	svc := s3.New(sess)
 
+	// Fetch secret
+	var keys secrets.Secret
+	encKey, err := secrets.GetSecret(sess, os.Getenv("_ENC_KEY"))
+	if err != nil {
+		log.Fatalf("error fetching encryption key: %v\n", err.Error())
+	}
+	if err := json.Unmarshal([]byte(encKey), &keys); err != nil {
+		log.Fatalf("error when unmarhsal from secret manager: %v\n", err.Error())
+	}
+
+	svc := s3.New(sess)
 	input := &s3.ListObjectsV2Input{
 		Bucket:  aws.String(os.Getenv("_S3_BUCKET")),
 		MaxKeys: aws.Int64(10),
@@ -62,8 +77,22 @@ func main() {
 		}
 		return
 	}
+
+	var reserveInfo registry.Reservation
 	for _, obj := range objects.Contents {
-		log.Printf("Object key: %s\n", *obj.Key)
+		s3Registry := registry.Registry{
+			Bucket:   os.Getenv("_S3_BUCKET"),
+			Dirname:  filepath.Dir(*obj.Key),
+			Filename: filepath.Base(*obj.Key),
+		}
+
+		if err := s3Registry.FetchRegistryFile(sess, keys.S3Enc); err != nil {
+			log.Fatalf("fetch registry file content error: %v\n", err.Error())
+		}
+		if err := json.Unmarshal(s3Registry.Content, &reserveInfo); err != nil {
+			log.Fatalf("error when unmarhsal from registry: %v\n", err.Error())
+		}
+		fmt.Printf("Reserve information: %+v\n", reserveInfo)
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
@@ -89,10 +118,16 @@ func main() {
 	})
 
 	var title string
+	var imgBuf []byte
 	if err := chromedp.Run(ctx,
 		chromedp.Navigate(os.Getenv("_DAAN_LOGIN")),
+		chromedp.Screenshot("#ContentPlaceHolder1_CaptchaImage", &imgBuf, chromedp.NodeVisible),
 		chromedp.Title(&title),
 	); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := ioutil.WriteFile("/tmp/captcha.png", imgBuf, 0o644); err != nil {
 		log.Fatal(err)
 	}
 	time.Sleep(time.Second * 3)
