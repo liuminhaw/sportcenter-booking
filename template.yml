@@ -48,3 +48,15 @@ Resources:
             Path: '/api/registry'
             Method: get
             RestApiId: ApiGatewayApi
+  DailyExecCheck:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dailyExecCheck
+      Handler: daily-check
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          S3Bucket: default-bucket
+          SecretKeyName: secret-manager-key-name
