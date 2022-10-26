@@ -12,8 +12,10 @@ Resources:
       StageName: Develop
   ReserveRegistry:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
-      CodeUri: ./reservationRegistry
+      CodeUri: .
       Handler: reservation-registry
       Runtime: go1.x
       Architectures:
@@ -31,8 +33,10 @@ Resources:
             RestApiId: ApiGatewayApi
   FetchRegistry:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
-      CodeUri: ./fetchRegistry
+      CodeUri: .
       Handler: fetch-registry
       Runtime: go1.x
       Architectures:
@@ -50,8 +54,10 @@ Resources:
             RestApiId: ApiGatewayApi
   DailyExecCheck:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
-      CodeUri: ./dailyExecCheck
+      CodeUri: .
       Handler: daily-check
       Runtime: go1.x
       Architectures:

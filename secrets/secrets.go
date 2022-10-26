@@ -25,7 +25,7 @@ func GetSecret(sess *session.Session, secretName string) (string, error) {
 
 	result, err := svc.GetSecretValue(input)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("GetSecret(sess, %s): %w", secretName, err)
 	}
 
 	// Decrypts secret using the associated KMS key.

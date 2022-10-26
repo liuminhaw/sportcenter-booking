@@ -6,6 +6,16 @@ Building application
 ```
 sam build
 ``` 
+### Q&A
+
+#### sam build with error
+```
+version `GLIBC_2.32' not found when building on linux
+```
+**Solution:** Setting custom build with BuildMehod `makefile`
+[GLIBC not found with AWS SAM and Golang](https://www.gaunt.dev/blog/2022/glibc-error-with-aws-sam-and-go/)
+
+
 ### Local testing API
 ```bash
 # start local api service
@@ -13,6 +23,9 @@ sam local start-api
 
 # start local api service with custom environment variables and aws credential profile name
 sam local start-api -n environments-dev.json --profile role-profile-name
+
+# local invoke function
+sam local invoke --env-vars environments-dev.json --profile role-profile-name "FunctionDefinitionName"
 ```
 
 ### Reserve Registry Request
@@ -21,7 +34,7 @@ curl -X POST localhost:3000/api/registry -d '
     {
         "username": "redone", 
         "password": "password", 
-        "reserveDate": "2022-07-04T23:23:23Z", 
+        "reserveDate": "2022-07-04T23:23:23+08:00", 
         "reserveCourt": "1", 
         "reserveTime": "21"
     }
